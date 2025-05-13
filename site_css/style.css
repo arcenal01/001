@@ -1,0 +1,26 @@
+body{
+	background-color: #A6D9E6;
+}
+table tr td{
+	border: ;
+}
+table{
+	width: 100%;
+	margin: auto;
+}
+.banner{
+	width: 100%;
+	height: 190px;
+}
+button{
+	color: black;
+	background-color: #006FE6;
+	border: none;
+	border-radius: 6px;
+	margin: 10px 0px;
+	font-size: 15px;
+	padding: 3px 5px;
+}
+a{
+	padding: 20px;
+}
