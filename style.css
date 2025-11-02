@@ -4,7 +4,7 @@
 }
 @font-face {
     font-family: menu ;
-    src: url(TitilliumWeb-SemiBold.ttf);
+    src: url(TitilliumWeb-SemiBold.ttf) format(truetype);
 }
 *{
     padding: 0px;
@@ -84,4 +84,5 @@ a:hover{
     font-family: "menu";
     font-size: 2.5pc;
 }
+
 
