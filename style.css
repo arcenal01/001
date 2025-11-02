@@ -1,10 +1,10 @@
 @font-face{
     font-family: IA ;
-    src: url(fonts/Montserrat-SemiBold.ttf) format(truetype);
+    src: url(Montserrat-SemiBold.ttf) format(truetype);
 }
 @font-face {
     font-family: menu ;
-    src: url(fonts/Titillium_Web/TitilliumWeb-SemiBold.ttf);
+    src: url(TitilliumWeb-SemiBold.ttf);
 }
 *{
     padding: 0px;
@@ -84,3 +84,4 @@ a:hover{
     font-family: "menu";
     font-size: 2.5pc;
 }
+
