@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>President Evolution — Template com fundo longo</title>
+<style>
+  :root{
+    --bg:#0b1220;
+    --panel: rgba(255,255,255,0.04);
+    --accent:#ffd24d;
+    --muted:#cbd5e1;
+    --ui-width:360px; /* largura de referência para o jogo (mobile) */
+  }
+  /* body */
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(180deg,#071021,#07162a);
+    color: #eef2ff;
+    font-family: Inter, system-ui, Arial;
+  }
+
+  /* Container principal que simula tela do jogo (mobile) */
+  .device {
+    width: var(--ui-width);
+    /* altura visível do "jogo" — ajuste conforme necessário */
+    height: 760px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(2,6,23,0.6);
+    background: linear-gradient(180deg,#0b1220,#071424);
+    position: relative;
+    border: 8px solid rgba(255,255,255,0.03);
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* Top bar da UI (fora do mapa) */
+  .top-ui{
+    height:72px;
+    padding:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .title{
+    font-weight:800;
+    letter-spacing:0.6px;
+    font-size:18px;
+    color: #fff;
+  }
+  .info-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .badge{
+    background: rgba(255,255,255,0.06);
+    padding:6px 10px;
+    border-radius:10px;
+    font-weight:700;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  /* Viewport do mapa — tem overflow hidden e mostra parte da imagem longa */
+  .map-viewport{
+    position:relative;
+    flex:1 1 auto;
+    overflow:hidden;
+    background: #f2f7f3; /* fallback branco */
+  }
+
+  /* A imagem bem alta (1000x15500) será dimensionada para largura do viewport.
+     Mantemos o img com width:100% e altura automática para preservar proporção. */
+  .map-img{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width: 1000px; /* imagem natural — vai escalar pela transformação abaixo */
+    height: auto;
+    user-select:none;
+    -webkit-user-drag:none;
+    pointer-events:none; /* evitar que a imagem capture eventos; o panning é pelo wrapper */
+    will-change:transform;
+  }
+
+  /* camadas sobre o mapa (onde ficam os presidentes, hotbar dentro do mapa) */
+  .map-layer{
+    position:absolute;
+    left:0; top:0;
+    width:100%;
+    height:100%;
+    pointer-events:none; /* habilito apenas quando necessário */
+  }
+
+  /* Cada peça/presidente */
+  .pres {
+    position:absolute;
+    width:78px;
+    height:78px;
+    border-radius:10px;
+    background: #fff;           /* placeholder - troque por image via background-image */
+    border: 3px solid rgba(0,0,0,0.12);
+    box-shadow: 0 8px 16px rgba(2,6,23,0.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    pointer-events:auto; /* peças recebem eventos de drag */
+    touch-action: none;
+    user-select:none;
+  }
+
+  /* Hotbar fixa sobre o mapa (na parte inferior do viewport) */
+  .hotbar {
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:12px;
+    width:92%;
+    max-width: 340px;
+    height:92px;
+    background: rgba(255,255,255,0.9);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+    padding:10px;
+    gap:8px;
+    pointer-events:auto;
+    color:#0b1220;
+  }
+  .slot{
+    width:62px;
+    height:62px;
+    background:#f3efe9;
+    border-radius:8px;
+    border:2px dashed rgba(0,0,0,0.06);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#333;
+  }
+
+  /* Bottom hint area */
+  .bottom-panel{
+    height:84px;
+    padding:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05));
+  }
+  .cta-btn{
+    background:var(--accent);
+    color:#081018;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:800;
+    box-shadow:0 6px 0 rgba(0,0,0,0.12);
+    cursor:pointer;
+    border:none;
+  }
+
+  /* Helper small text */
+  .muted { color:var(--muted); font-size:13px; }
+  .small { font-size:12px; color:var(--muted); }
+
+  /* responsive shrink */
+  @media (max-width:420px){
+    :root{ --ui-width:360px; }
+    .device{ height:780px; }
+  }
+</style>
+</head>
+<body>
+  <div class="device" id="device">
+    <div class="top-ui">
+      <div class="title">PRESIDENTS EVOLUTION</div>
+      <div class="info-row">
+        <div class="badge" id="levelBadge">Nível máximo 1</div>
+        <div class="badge" id="coinsBadge">💰 0</div>
+      </div>
+    </div>
+
+    <div class="map-viewport" id="viewport">
+      <!-- imagem longa; substitua src para o seu arquivo exato -->
+      <img id="mapImage" class="map-img" src="img/fundo.jpeg" alt="Mapa de Brasília (fundo longo)">
+
+      <!-- camada onde as peças serão colocadas (posições relativas ao viewport) -->
+      <div class="map-layer" id="mapLayer"></div>
+
+      <!-- hotbar (sobreposta, fixa na parte inferior do viewport) -->
+      <div class="hotbar" id="hotbar">
+        <div class="slot" data-index="0"></div>
+        <div class="slot" data-index="1"></div>
+        <div class="slot" data-index="2"></div>
+        <div class="slot" data-index="3"></div>
+        <div class="slot" data-index="4"></div>
+      </div>
+    </div>
+
+    <div class="bottom-panel">
+      <button class="cta-btn" id="openBox">Abrir Caixa</button>
+    </div>
+  </div>
+
+<script>
+/*
+  Template para usar imagem de fundo longa (1000 x 15500).
+  - A imagem será exibida com largura fixa proporcional ao container.
+  - Você pode arrastar verticalmente o mapa (pan) para ver outras partes.
+  - Peças (presidentes) aparecem sobre o viewport; são arrastáveis.
+  - Hotbar está pronta (slots vazios).
+  - Substitua 'planato.png' e as imagens das peças conforme preciso.
+*/
+
+/* ------------ CONFIG ------------- */
+const MAP_NATURAL_W = 1000;   // largura natural da imagem (px)
+const MAP_NATURAL_H = 15500; // altura natural da imagem (px)
+const device = document.getElementById('device');
+const viewport = document.getElementById('viewport');
+const mapImage = document.getElementById('mapImage');
+const mapLayer = document.getElementById('mapLayer');
+const openBoxBtn = document.getElementById('openBox');
+const coinsBadge = document.getElementById('coinsBadge');
+const levelBadge = document.getElementById('levelBadge');
+const hotbar = document.getElementById('hotbar');
+let coins = 0;
+let maxLevel = 1;
+
+/* a lista de presidentes (substitua URLs por suas imagens) */
+const PRESIDENTS = {
+  1: { name: "Dilma", img: "img/dilma2.png" },
+  2: { name: "Pres2", img: "pres2.png" },
+  3: { name: "Pres3", img: "pres3.png" },
+  4: { name: "Pres4", img: "pres4.png" },
+  5: { name: "Pres5", img: "pres5.png" },
+  6: { name: "Pres6", img: "pres6.png" },
+  7: { name: "Pres7", img: "pres7.png" }
+};
+
+/* peças vivas no mapa (DOM elements) */
+let pieces = [];
+let nextId = 1;
+
+/* ------ Ajuste inicial da imagem para caber em largura do viewport -----
+   A imagem tem largura natural 1000px; queremos que ela escale para a
+   largura do device (em CSS definimos device width). Calculamos a escala
+   e setamos a largura real do <img> para MAP_NATURAL_W * scale.
+   Depois podemos pan verticalmente entre 0 e (imgHeight - viewportHeight).
+*/
+function fitMapImage(){
+  const viewportWidth = viewport.clientWidth;
+  // queremos que a imagem ocupe 100% da largura do device (ou menor)
+  // calc scale = viewportWidth / naturalWidth
+  const scale = viewportWidth / MAP_NATURAL_W;
+  const imgDisplayW = MAP_NATURAL_W * scale;
+  const imgDisplayH = MAP_NATURAL_H * scale;
+  // setamos width no elemento (em CSS já width:1000px, então alteramos transform scale)
+  // mais simples: definir width em px para escalar automaticamente:
+  mapImage.style.width = imgDisplayW + "px";
+  mapImage.dataset.displayHeight = imgDisplayH; // guardamos para panning
+  // posicionamos a imagem de forma centralizada horizontalmente (CSS já faz)
+}
+window.addEventListener('resize', fitMapImage);
+fitMapImage();
+
+/* ---------- PAN (arrastar verticalmente o mapa) ---------- */
+let isPanning = false;
+let startY = 0;
+let startImgTop = 0;
+
+// A camada que recebe o drag é o viewport (não a imagem)
+viewport.addEventListener('pointerdown', (e) => {
+  // se clicar em uma peça, não inicie pan (as peças terão pointerdown).
+  if(e.target.classList && e.target.classList.contains('pres')) return;
+  isPanning = true;
+  startY = e.clientY;
+  // obter a atual translateY (transform) do mapImage wrapper -> usamos dataset.top
+  const curTop = parseFloat(mapImage.dataset.top || 0);
+  startImgTop = curTop;
+  viewport.setPointerCapture(e.pointerId);
+});
+viewport.addEventListener('pointermove', (e) => {
+  if(!isPanning) return;
+  const dy = e.clientY - startY;
+  setMapTop(startImgTop + dy);
+});
+viewport.addEventListener('pointerup', (e) => {
+  isPanning = false;
+  try { viewport.releasePointerCapture(e.pointerId); } catch(e){}
+});
+viewport.addEventListener('pointercancel', ()=> isPanning=false);
+
+/* setMapTop controla limite de pan (não sair da imagem) */
+function setMapTop(y){
+  const imgH = parseFloat(mapImage.dataset.displayHeight || 0);
+  const vpH = viewport.clientHeight;
+  // limites: top <= 0  e top >= vpH - imgH
+  const minTop = Math.min(0, vpH - imgH);
+  const maxTop = 0;
+  let newTop = Math.max(minTop, Math.min(maxTop, y));
+  mapImage.style.transform = `translateX(-50%) translateY(${newTop}px)`;
+  mapImage.dataset.top = newTop;
+  // também ajustamos a camada de peças para o mesmo deslocamento
+  mapLayer.style.transform = `translateY(${newTop}px)`;
+}
+
+/* iniciar centralizando a imagem no topo (ou algum offset inicial) */
+setTimeout(()=> setMapTop(0), 50);
+
+/* --------- Função util para converter posição relativa ao viewport para posição na camada (leva em conta o pan) -------- */
+function viewportToMapLayerCoords(screenX, screenY){
+  // queremos coords relativas ao mapLayer (posição onde colocar a peça)
+  // obter bounding rect do viewport
+  const vpRect = viewport.getBoundingClientRect();
+  // posição dentro viewport:
+  const localX = screenX - vpRect.left;
+  const localY = screenY - vpRect.top;
+  // mapLayer está traduzida verticalmente (dataset.top)
+  const top = parseFloat(mapImage.dataset.top || 0);
+  // a posição final dentro da camada: x igual localX, y = localY - top
+  const layerX = localX;
+  const layerY = localY - top;
+  return { x: layerX, y: layerY };
+}
+
+/* ---------- Spawn de peça (Abrir Caixa) ---------- */
+openBoxBtn.addEventListener('click', () => {
+  spawnPresident(1);
+});
+
+function spawnPresident(level){
+  // cria elemento DOM da peça e posicione em local aleatório VISÍVEL no viewport
+  const vpRect = viewport.getBoundingClientRect();
+  // escolher x e y aleatório dentro da área visível (com margem)
+  const margin = 40;
+  const px = margin + Math.random() * (vpRect.width - margin*2);
+  const py = margin + Math.random() * (vpRect.height - margin*2);
+  // convert to layer coords (consider pan)
+  const coords = viewportToMapLayerCoords(vpRect.left + px, vpRect.top + py);
+
+  const el = document.createElement('div');
+  el.className = 'pres';
+  el.dataset.id = nextId++;
+  el.dataset.level = level;
+  el.dataset.name = PRESIDENTS[level].name;
+
+  // colocar imagem do presidente se existir; senão usa fundo branco com texto
+  const imgUrl = PRESIDENTS[level].img;
+  if(imgUrl){
+    el.style.backgroundImage = `url(${imgUrl})`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  } else {
+    el.textContent = PRESIDENTS[level].name.split(' ')[0];
+    el.style.fontSize = '13px';
+  }
+
+  // posição (na layer)
+  el.style.left = coords.x - 39 + 'px'; // centraliza (78/2 = 39)
+  el.style.top = coords.y - 39 + 'px';
+
+  // adicionar eventos de drag para a peça
+  makePieceDraggable(el);
+
+  mapLayer.appendChild(el);
+  pieces.push(el);
+}
+
+/* --------- Drag das peças (arrastar individualmente) ---------- */
+function makePieceDraggable(el){
+  let dragging = false;
+  let offsetX = 0, offsetY = 0;
+
+  el.addEventListener('pointerdown', (e) => {
+    e.stopPropagation(); // evitar pan do mapa
+    dragging = true;
+    el.setPointerCapture(e.pointerId);
+    const rect = el.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    el.style.transition = 'none';
+  });
+
+  document.addEventListener('pointermove', (e) => {
+    if(!dragging) return;
+    // posiciona com base em mapa-layer coords
+    const coords = viewportToMapLayerCoords(e.clientX, e.clientY);
+    el.style.left = (coords.x - 39) + 'px';
+    el.style.top = (coords.y - 39) + 'px';
+  });
+
+  el.addEventListener('pointerup', (e) => {
+    if(!dragging) return;
+    dragging = false;
+    try { el.releasePointerCapture(e.pointerId); } catch(e){}
+    el.style.transition = '';
+    // ao soltar podemos checar merges (quando implementar) ou snap para slot
+    // por enquanto, pequeno efeito de 'soltou'
+    el.animate([{ transform: 'scale(0.97)' }, { transform: 'scale(1)' }], { duration: 140 });
+  });
+}
+
+/* ---------- Hotbar interações simples (clique para colocar na tela) ---------- */
+const slotElements = Array.from(document.querySelectorAll('.slot'));
+slotElements.forEach((slot, i) => {
+  slot.addEventListener('click', () => {
+    // Se o slot estiver vazio -> tentar puxar a primeira peça do mapa pra cá (exemplo)
+    if(!slot.dataset.occupied){
+      // if there are pieces, move last spawned to slot (demo)
+      const last = pieces[pieces.length - 1];
+      if(last){
+        // snap piece to center of slot (we'll absolute position relative to viewport)
+        // compute slot position relative to mapLayer: we want it to visually sit above hotbar
+        slot.dataset.occupied = last.dataset.id;
+        // position piece visually over the slot center (convert slot center screen -> layer coords)
+        const slotRect = slot.getBoundingClientRect();
+        const coords = viewportToMapLayerCoords(slotRect.left + slotRect.width/2, slotRect.top + slotRect.height/2);
+        last.style.left = (coords.x - 39) + 'px';
+        last.style.top = (coords.y - 39) + 'px';
+      }
+    } else {
+      // liberar slot (exemplo)
+      slot.removeAttribute('data-occupied');
+    }
+  });
+});
+
+/* ---------- Helpers para atualizar UI ---------- */
+function addCoins(n){
+  coins += n;
+  coinsBadge.textContent = '💰 ' + coins;
+}
+function setMaxLevel(n){
+  maxLevel = Math.max(maxLevel, n);
+  levelBadge.textContent = 'Nível máximo ' + maxLevel;
+}
+
+/* ---------- Inicialização: ajuste de imagem e posicionamento ---------- */
+(function init(){
+  // Forçar carregar imagem e setar displayHeight
+  mapImage.onload = () => {
+    fitMapImage();
+    setMapTop(0);
+  };
+  // se já carregada (cache)
+  if(mapImage.complete) {
+    fitMapImage();
+    setMapTop(0);
+  }
+  // exemplo: spawn 1 presidente inicial para testar
+  // spawnPresident(1);
+})();
+
+</script>
+</body>
+</html>

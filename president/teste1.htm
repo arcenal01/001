@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>President Evolution — Template com fundo longo</title>
+<style>
+  :root{
+    --bg:#0b1220;
+    --panel: rgba(255,255,255,0.04);
+    --accent:#ffd24d;
+    --muted:#cbd5e1;
+    --ui-width:360px;
+  }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(180deg,#071021,#07162a);
+    color:#eef2ff;
+    font-family:Inter,system-ui,Arial;
+    overflow:auto;
+  }
+
+  .device{
+    width:var(--ui-width);
+    height:760px;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 30px 80px rgba(2,6,23,0.6);
+    background:linear-gradient(180deg,#0b1220,#071424);
+    position:relative;
+    border:8px solid rgba(255,255,255,0.03);
+    display:flex;
+    flex-direction:column;
+  }
+
+  .top-ui{
+    height:72px;
+    padding:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+
+  .title{font-weight:800;letter-spacing:0.6px;font-size:18px;color:#fff;}
+  .info-row{display:flex;gap:8px;align-items:center;}
+  .badge{background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:10px;font-weight:700;color:var(--muted);font-size:14px;}
+
+  .map-viewport{
+    position:relative;
+    flex:1 1 auto;
+    overflow:hidden;
+    background:#000;
+    touch-action:none;
+  }
+
+  .map-img{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    height:100%;
+    object-fit:cover;   /* ✔️ elimina espaço branco */
+    pointer-events:none;
+    user-select:none;
+  }
+
+  .map-layer{
+    position:absolute;
+    left:0;top:0;width:100%;height:100%;pointer-events:none;
+  }
+
+  .pres{
+    position:absolute;
+    width:78px;height:78px;
+    border-radius:10px;
+    background:#fff;
+    border:3px solid rgba(0,0,0,0.12);
+    box-shadow:0 8px 16px rgba(2,6,23,0.45);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+    pointer-events:auto;
+    touch-action:none;
+    background-size:cover;
+  }
+
+  /* ✔️ painel inferior fixo embaixo SEM ir para o lado */
+  .bottom-panel{
+    height:84px;
+    padding:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.05));
+    width:100%;
+    flex-shrink:0; /* evita estourar layout */
+  }
+
+  .cta-btn{
+    background:var(--accent);
+    color:#081018;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:800;
+    box-shadow:0 6px 0 rgba(0,0,0,0.12);
+    cursor:pointer;
+    border:none;
+  }
+
+  @media(max-width:420px){
+    :root{--ui-width:360px;}
+    .device{height:780px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device" id="device">
+
+  <div class="top-ui">
+    <div class="title">PRESIDENTS EVOLUTION</div>
+    <div class="info-row">
+      <div class="badge" id="levelBadge">Nível máximo 1</div>
+      <div class="badge" id="coinsBadge">💰 0</div>
+    </div>
+  </div>
+
+  <div class="map-viewport" id="viewport">
+    <img id="mapImage" class="map-img" src="img/fundo.jpeg" alt="Mapa de Brasília (fundo)">
+    <div class="map-layer" id="mapLayer"></div>
+  </div>
+
+  <div class="bottom-panel">
+    <button class="cta-btn" id="openBox">Abrir Caixa</button>
+  </div>
+
+</div>
+
+<script>
+/* LISTA DE PRESIDENTES */
+const PRESIDENTS = {
+  1:{name:"Dilma",img:"img/dilma2.png"},
+  2:{name:"Pres2",img:"pres2.png"},
+  3:{name:"Pres3",img:"pres3.png"},
+  4:{name:"Pres4",img:"pres4.png"},
+  5:{name:"Pres5",img:"pres5.png"},
+  6:{name:"Pres6",img:"pres6.png"},
+  7:{name:"Pres7",img:"pres7.png"}
+};
+
+const viewport=document.getElementById('viewport');
+const mapLayer=document.getElementById('mapLayer');
+const openBoxBtn=document.getElementById('openBox');
+let nextId=1;
+let pieces=[];
+
+/* Sem pan – mapa fixo */
+function viewportToMapLayerCoords(x,y){
+  const r=viewport.getBoundingClientRect();
+  return {x:x-r.left,y:y-r.top};
+}
+
+openBoxBtn.addEventListener('click',()=>spawnPresident(1));
+
+function spawnPresident(level){
+  const vp=viewport.getBoundingClientRect();
+  const px=40+Math.random()*(vp.width-80);
+  const py=40+Math.random()*(vp.height-80);
+  const pos=viewportToMapLayerCoords(vp.left+px,vp.top+py);
+
+  const el=document.createElement('div');
+  el.className='pres';
+  el.dataset.id=nextId++;
+  el.dataset.level=level;
+
+  const img=PRESIDENTS[level].img;
+  if(img){
+    el.style.backgroundImage=`url(${img})`;
+  }
+
+  el.style.left=(pos.x-39)+"px";
+  el.style.top=(pos.y-39)+"px";
+
+  makePieceDraggable(el);
+  mapLayer.appendChild(el);
+  pieces.push(el);
+}
+
+function makePieceDraggable(el){
+  let drag=false;
+  el.addEventListener('pointerdown',e=>{
+    drag=true;
+    el.setPointerCapture(e.pointerId);
+  });
+
+  document.addEventListener('pointermove',e=>{
+    if(!drag)return;
+    const pos=viewportToMapLayerCoords(e.clientX,e.clientY);
+    el.style.left=(pos.x-39)+"px";
+    el.style.top=(pos.y-39)+"px";
+  });
+
+  document.addEventListener('pointerup',e=>{
+    if(!drag)return;
+    drag=false;
+    try{el.releasePointerCapture(e.pointerId);}catch{}
+  });
+}
+</script>
+</body>
+</html>

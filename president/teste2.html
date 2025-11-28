@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>President Evolution — Template com fundo longo</title>
+
+<style>
+  :root{
+    --bg:#0b1220;
+    --panel: rgba(255,255,255,0.04);
+    --accent:#ffd24d;
+    --muted:#cbd5e1;
+    --ui-width:360px;
+  }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    background: linear-gradient(180deg,#071021,#07162a);
+    color:#eef2ff;
+    font-family:Inter,system-ui,Arial;
+    overflow:auto;
+    padding-bottom:60px;
+  }
+
+  header{
+    width:100%;
+    padding:20px;
+    text-align:center;
+    font-size:26px;
+    font-weight:900;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(4px);
+    margin-bottom:20px;
+  }
+
+  .infos-site{
+    width:90%;
+    max-width:1000px;
+    background:rgba(255,255,255,0.05);
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:30px;
+    line-height:1.6;
+    display:flex;
+    flex-direction:column;
+    gap:30px;
+    justify-content:center;
+    align-items:center;
+  }
+
+  .infos-site .text-box{
+    width:100%;
+    max-width:600px;
+    text-align:center;
+  }
+
+  .social{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+    justify-content:center;
+  }
+
+  .social button{
+    background:var(--accent);
+    border:none;
+    padding:10px 18px;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+    color:#000;
+  }
+
+  footer{
+    margin-top:40px;
+    padding:20px;
+    opacity:0.7;
+    font-size:14px;
+  }
+
+  /* GAME */
+
+  .device{
+    width:var(--ui-width);
+    height:760px;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 30px 80px rgba(2,6,23,0.6);
+    background:linear-gradient(180deg,#0b1220,#071424);
+    position:relative;
+    border:8px solid rgba(255,255,255,0.03);
+    display:flex;
+    flex-direction:column;
+    flex-shrink:0;
+    margin:auto;
+  }
+
+  .top-ui{
+    height:72px;
+    padding:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+
+  .title{font-weight:800;letter-spacing:0.6px;font-size:18px;color:#fff;}
+  .info-row{display:flex;gap:8px;align-items:center;}
+  .badge{
+    background:rgba(255,255,255,0.06);
+    padding:6px 10px;
+    border-radius:10px;
+    font-weight:700;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .map-viewport{
+    position:relative;
+    flex:1 1 auto;
+    overflow:hidden;
+    background:#000;
+    touch-action:none;
+  }
+
+  .map-img{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    pointer-events:none;
+    user-select:none;
+  }
+
+  .map-layer{
+    position:absolute;
+    left:0; top:0;
+    width:100%; height:100%;
+    pointer-events:none;
+  }
+
+  .pres{
+    position:absolute;
+    width:78px; 
+    height:130px;
+    background-size:cover;
+    background-position:center;
+    pointer-events:auto;
+    touch-action:none;
+  }
+
+  .bottom-panel{
+    height:84px;
+    padding:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.05));
+    width:100%;
+    flex-shrink:0;
+  }
+
+  .cta-btn{
+    background:var(--accent);
+    color:#081018;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:800;
+    box-shadow:0 6px 0 rgba(0,0,0,0.12);
+    cursor:pointer;
+    border:none;
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  PRESIDENT EVOLUTION — SITE OFICIAL
+</header>
+
+<div class="infos-site">
+
+  <div class="text-box">
+    <h2>Sobre o Jogo</h2>
+    <p>
+      Bem-vindo a Brasilia: <br>  
+      O antro da mentira no Brasil, onde do melhor ao pior presidente cada um produz sua própria corrupção por segundo.
+    </p>
+  </div>
+
+  <div class="device" id="device">
+
+    <div class="top-ui">
+      <div class="title">EVOLUTION</div>
+      <div class="info-row">
+        <div class="badge" id="levelBadge">máximo 1</div>
+        <div class="badge" id="coinsBadge">💰 0</div>
+      </div>
+    </div>
+
+    <div class="map-viewport" id="viewport">
+      <img id="mapImage" class="map-img" src="img/fundo.jpeg">
+      <div class="map-layer" id="mapLayer"></div>
+    </div>
+
+    <div class="bottom-panel">
+      <button class="cta-btn" id="openBox">Abrir Caixa</button>
+    </div>
+
+  </div>
+
+  <div class="text-box">
+    <h3>Links úteis</h3>
+    <div class="social">
+      <button>Instagram</button>
+      <button>Discord</button>
+      <button>Youtube</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  © 2025 — President Evolution — Todos os direitos reservados.
+</footer>
+
+<script>
+/* ---------------- PRESIDENTES ---------------- */
+const PRESIDENTS = {
+  1:{name:"Bolsonaro", img:"img/bolsonaro2.png", audio:"audio/bolsonaro.mp3", base:1},
+  2:{name:"JK",        img:"img/jk2.png",        audio:"audio/jk.mpeg",        base:2},
+  3:{name:"FHC",       img:"img/fhc2.png",       audio:"audio/fhc.mpeg",       base:4},
+  4:{name:"Vargas",    img:"img/vargas2.png",    audio:"audio/vargas.mpeg",    base:8},
+  5:{name:"Collor",    img:"img/collor2.png",    audio:"audio/collor.mpeg",    base:16},
+  6:{name:"Dilma",     img:"img/dilma2.png",     audio:"audio/dilma.mpeg",     base:32},
+  7:{name:"Lula",      img:"img/lula2.png",      audio:"audio/lula.mpeg",      base:64},
+  8:{name:"LulaMAX",   img:"img/lula3.png",      audio:"audio/lulamax.mpeg",   base:128},
+
+  /* ---------------- ENÉAS (EASTER EGG) ---------------- */
+  99:{name:"Enéas", img:"img/eneas2.png", audio:"audio/eneas.mpeg", base:999}
+};
+
+/* ---------------- SISTEMA DE ÁUDIO CORRIGIDO ---------------- */
+
+let currentAudio = null;
+
+function playPresidentAudio(level){
+  const src = PRESIDENTS[level].audio;
+  if(!src) return;
+
+  if(currentAudio){
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+
+  currentAudio = new Audio(src);
+  currentAudio.volume = 1;
+  currentAudio.play().catch(()=>{});
+}
+
+/* ----------------------------------------------------------- */
+
+const viewport = document.getElementById("viewport");
+const mapLayer = document.getElementById("mapLayer");
+const coinsBadge = document.getElementById("coinsBadge");
+
+let coins = 0;
+let nextId = 1;
+let pieces = [];
+let boxesOpened = 0;
+
+/* ÁREA VÁLIDA PARA DROPS */
+function getParkBounds(){
+  const vp = viewport.getBoundingClientRect();
+  return {
+    xMin: vp.width * 0.22,
+    xMax: vp.width * 0.78,
+    yMin: vp.height * 0.32,
+    yMax: vp.height * 0.92
+  };
+}
+
+function viewportToMapCoords(x,y){
+  const r = viewport.getBoundingClientRect();
+  return { x:x - r.left, y:y - r.top };
+}
+
+function spawnPresident(level){
+  const park = getParkBounds();
+  const px = park.xMin + Math.random() * (park.xMax - park.xMin);
+  const py = park.yMin + Math.random() * (park.yMax - park.yMin);
+
+  const pos = viewportToMapCoords(
+    viewport.getBoundingClientRect().left + px,
+    viewport.getBoundingClientRect().top + py
+  );
+
+  const el = document.createElement("div");
+  el.className = "pres";
+  el.dataset.id = nextId++;
+  el.dataset.level = level;
+  el.style.backgroundImage = `url(${PRESIDENTS[level].img})`;
+
+  el.style.left = (pos.x - 39) + "px";
+  el.style.top  = (pos.y - 39) + "px";
+
+  mapLayer.appendChild(el);
+  pieces.push(el);
+
+  makeDraggable(el);
+  playPresidentAudio(level);
+  checkMerge();
+}
+
+function makeDraggable(el){
+  let drag = false;
+
+  el.addEventListener("pointerdown", e => {
+    drag = true;
+    el.setPointerCapture(e.pointerId);
+  });
+
+  document.addEventListener("pointermove", e=>{
+    if(!drag) return;
+    const pos = viewportToMapCoords(e.clientX, e.clientY);
+    el.style.left = (pos.x - 39) + "px";
+    el.style.top  = (pos.y - 39) + "px";
+  });
+
+  document.addEventListener("pointerup", e=>{
+    if(!drag) return;
+    drag = false;
+    try { el.releasePointerCapture(e.pointerId); } catch {}
+    checkMerge();
+  });
+}
+
+function checkMerge(){
+  for(let i=0;i<pieces.length;i++){
+    for(let j=i+1;j<pieces.length;j++){
+      const a = pieces[i];
+      const b = pieces[j];
+      if(!a || !b) continue;
+
+      const la = Number(a.dataset.level);
+      const lb = Number(b.dataset.level);
+
+      if(la === lb && la !== 99){
+
+        const ax = parseInt(a.style.left);
+        const ay = parseInt(a.style.top);
+        const bx = parseInt(b.style.left);
+        const by = parseInt(b.style.top);
+
+        if(Math.hypot(ax - bx, ay - by) < 60){
+
+          const newLevel = Math.min(8, la+1);
+          a.remove();
+          b.remove();
+
+          pieces = pieces.filter(p => p !== a && p !== b);
+
+          spawnPresident(newLevel);
+          updateHighestLevel();
+          return;
+        }
+      }
+    }
+  }
+}
+
+function updateHighestLevel(){
+  let max = 1;
+  pieces.forEach(p=>{
+    const lvl = Number(p.dataset.level);
+    if(lvl !== 99) max = Math.max(max, lvl);
+  });
+  document.getElementById("levelBadge").textContent = "máximo " + max;
+}
+
+setInterval(()=>{
+  let total = 0;
+  pieces.forEach(p=>{
+    total += PRESIDENTS[Number(p.dataset.level)].base;
+  });
+  coins += total;
+  coinsBadge.textContent = "💰 " + coins;
+}, 1000);
+
+/* ---------------- CAIXA / ENÉAS ---------------- */
+document.getElementById("openBox").onclick = ()=>{
+
+  boxesOpened++;
+
+  if(boxesOpened % 56 === 0){
+    spawnPresident(99);     // ENÉAS DROP
+  } else {
+    spawnPresident(1);      // normal
+  }
+};
+</script>
+</body>
+</html>
