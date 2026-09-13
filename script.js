@@ -85,6 +85,78 @@
             window.addEventListener('load', safetyCheck);
         })();
 
+// Botão "três pontinhos" do menu mobile: abre/fecha os links ao lado
+        (function () {
+            const toggle = document.getElementById('navToggle');
+            const links = document.getElementById('navLinks');
+            if (!toggle || !links) return;
+
+            function closeMenu() {
+                links.classList.remove('is-open');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+
+            function openMenu() {
+                links.classList.add('is-open');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = links.classList.contains('is-open');
+                isOpen ? closeMenu() : openMenu();
+            });
+
+            // Fecha ao clicar em um link do menu
+            links.querySelectorAll('a').forEach((link) => {
+                link.addEventListener('click', closeMenu);
+            });
+
+            // Fecha ao clicar fora do menu
+            document.addEventListener('click', (e) => {
+                if (!links.classList.contains('is-open')) return;
+                if (links.contains(e.target) || toggle.contains(e.target)) return;
+                closeMenu();
+            });
+
+            // Fecha com a tecla Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && links.classList.contains('is-open')) {
+                    closeMenu();
+                    toggle.focus();
+                }
+            });
+
+            // Fecha o menu automaticamente se a tela crescer para o layout de desktop
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) closeMenu();
+            });
+        })();
+
+// No toque (celular), destaca os blocos de TCC conforme o dedo passa por
+// cima durante o scroll, simulando o hover do mouse — sem precisar clicar,
+// só para o usuário perceber que a funcionalidade existe.
+        (function () {
+            const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+            if (!isTouch || !('IntersectionObserver' in window)) return;
+
+            const cards = document.querySelectorAll('.tcc-card, .tcc-showcase-card');
+            if (cards.length === 0) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    entry.target.classList.toggle('touch-active', entry.isIntersecting);
+                });
+            }, {
+                // Faixa fina no centro vertical da tela: o card "acende"
+                // assim que o dedo/scroll passa por cima dele
+                rootMargin: '-42% 0px -42% 0px',
+                threshold: 0
+            });
+
+            cards.forEach(card => observer.observe(card));
+        })();
+
 // Filtro de categorias na vitrine de TCCs (tccs.html)
         (function () {
             const filterTags = document.querySelectorAll('.filter-tag');
@@ -368,7 +440,11 @@
                 });
 
                 card.addEventListener('pointerdown', (e) => {
-                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    // O efeito de arrastar com resistência elástica é só para
+                    // mouse (desktop). No toque, deixamos o navegador rolar a
+                    // tira de fotos normalmente, sem interferência do JS.
+                    if (e.pointerType !== 'mouse') return;
+                    if (e.button !== 0) return;
 
                     clearProxy();
                     settleCardBeforeDrag();

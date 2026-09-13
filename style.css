@@ -194,6 +194,132 @@
                 display: flex;
             }
         }
+
+        /* Botão do menu mobile: círculo com o gradiente da marca, os
+           pontinhos giram para indicar que o menu abriu */
+        .nav-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.75rem;
+            height: 2.75rem;
+            padding: 0;
+            border: none;
+            border-radius: var(--radius-circle);
+            background: var(--gradient-brand-diagonal);
+            color: var(--color-white);
+            cursor: pointer;
+            box-shadow: 0 6px 16px -6px var(--shadow-secondary);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .nav-toggle svg {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .nav-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px -6px var(--shadow-secondary);
+        }
+
+        .nav-toggle[aria-expanded="true"] {
+            box-shadow: 0 3px 10px -4px var(--shadow-secondary);
+        }
+
+        .nav-toggle[aria-expanded="true"] svg {
+            transform: rotate(90deg);
+        }
+
+        @media (min-width: 768px) {
+            .nav-toggle {
+                display: none;
+            }
+        }
+
+        /* No mobile, os links viram um painel que abre ao lado do botão,
+           com uma tarja do gradiente da marca no topo e uma "setinha"
+           apontando para o botão que o abriu */
+        @media (max-width: 767px) {
+            nav .links {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: calc(100% + 0.85rem);
+                right: 0;
+                left: auto;
+                transform-origin: top right;
+                min-width: 210px;
+                gap: 0.2rem;
+                padding: 0.9rem 0.6rem 0.6rem;
+                background: var(--color-white);
+                border-radius: var(--radius-lg);
+                box-shadow: 0 18px 36px -12px var(--shadow-dark);
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                transform: scale(0.92) translateY(-8px);
+                transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.22s ease;
+                overflow: hidden;
+            }
+
+            nav .links::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: var(--gradient-brand);
+            }
+
+            nav .links::after {
+                content: '';
+                position: absolute;
+                top: -5px;
+                right: 18px;
+                width: 12px;
+                height: 12px;
+                background: var(--color-white);
+                border-radius: 3px 0 0 0;
+                transform: rotate(45deg);
+                box-shadow: -2px -2px 4px -2px rgba(10, 14, 39, 0.08);
+            }
+
+            nav .links.is-open {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+                transform: scale(1) translateY(0);
+            }
+
+            nav .links a {
+                position: relative;
+                padding: 0.65rem 0.8rem;
+                border-radius: var(--radius-sm);
+                border-left: 3px solid transparent;
+                opacity: 0;
+                transform: translateX(6px);
+                transition: background 0.2s ease, border-color 0.2s ease, opacity 0.25s ease, transform 0.25s ease;
+            }
+
+            /* Links entram em cascata, um instante depois do painel */
+            nav .links.is-open a {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            nav .links a:nth-child(1) { transition-delay: 0.04s; }
+            nav .links a:nth-child(2) { transition-delay: 0.08s; }
+            nav .links a:nth-child(3) { transition-delay: 0.12s; }
+            nav .links a:nth-child(4) { transition-delay: 0.16s; }
+            nav .links a:nth-child(5) { transition-delay: 0.2s; }
+            nav .links a:nth-child(6) { transition-delay: 0.24s; }
+
+            nav .links a:hover {
+                background: var(--color-blue-soft);
+                border-left-color: var(--color-secondary);
+            }
+        }
         
         nav .links a {
             text-decoration: none;
@@ -771,7 +897,8 @@
             cursor: pointer;
         }
         
-        .tcc-card:hover {
+        .tcc-card:hover,
+        .tcc-card.touch-active {
             transform: translateY(-6px);
             border-color: var(--color-secondary);
             box-shadow: 0 16px 40px -10px var(--shadow-secondary-soft);
@@ -1242,7 +1369,10 @@
             scrollbar-width: thin;
             scrollbar-color: var(--ch-accent, var(--color-secondary)) transparent;
             cursor: grab;
-            touch-action: pan-y;
+            /* Permite que o navegador role nativamente nos dois eixos: o
+               swipe horizontal passa a rolar as fotos, e o vertical
+               continua repassado para a rolagem da página */
+            touch-action: pan-x pan-y;
             overscroll-behavior-x: contain;
         }
 
@@ -1282,7 +1412,16 @@
             transition: opacity 0.6s ease, transform 0.6s ease, translate 0.65s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.35s ease, box-shadow 0.35s ease;
             translate: var(--drag-x, 0px) var(--drag-y, 0px);
             cursor: grab;
-            touch-action: none;
+            /* O efeito de "puxar e soltar" com resistência elástica só
+               roda no mouse (ver script.js); no toque, o cartão deixa o
+               navegador rolar a tira de fotos normalmente */
+            touch-action: pan-x pan-y;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .monitor-card {
+                touch-action: none;
+            }
         }
 
         .monitor-card.in-view {
@@ -2089,11 +2228,13 @@
             transform: translateY(0);
         }
 
-        .tcc-showcase-card.in-view:hover {
+        .tcc-showcase-card.in-view:hover,
+        .tcc-showcase-card.in-view.touch-active {
             transform: translateY(-6px);
         }
 
-        .tcc-showcase-card:hover {
+        .tcc-showcase-card:hover,
+        .tcc-showcase-card.touch-active {
             border-color: var(--color-secondary);
             box-shadow: 0 20px 40px -10px var(--shadow-secondary-soft);
         }
@@ -2378,7 +2519,8 @@
         }
 
         /* Quando o cartão inteiro está com hover, reforça a dica visual do gradiente */
-        .tcc-showcase-card:hover .tcc-card-fade {
+        .tcc-showcase-card:hover .tcc-card-fade,
+        .tcc-showcase-card.touch-active .tcc-card-fade {
             background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 55%, var(--color-white) 85%);
         }
 
@@ -2619,86 +2761,152 @@
 
         /* Mobile Timeline Responsivity */
         @media (max-width: 768px) {
+            /* Layout compacto: a linha + os anos ficam alinhados num canto
+               (esquerda) e um cartão fino ("quadrinho") fica ao lado, já
+               com o conteúdo visível — sem precisar de toque e sem nenhuma
+               animação, que no celular não acompanhava bem o layout vertical. */
             .timeline {
                 flex-direction: column;
-                align-items: center;
-                padding: 40px 0;
+                align-items: stretch;
+                padding: 8px 4px;
                 min-height: auto;
-                gap: 40px;
+                gap: 14px;
             }
 
             .timeline::before {
-                top: 0;
+                top: 4px;
                 bottom: auto;
-                left: 30px;
+                left: 5px;
                 right: auto;
-                width: 3px;
-                height: 100%;
+                width: 2px;
+                height: calc(100% - 8px);
             }
 
             .timeline-item {
-                flex: 1;
+                position: relative;
+                flex: none;
                 width: 100%;
-                margin-bottom: 20px;
-            }
-
-            .point-circle {
-                bottom: auto;
-                top: 0;
-                left: 30px;
+                display: flex;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 0;
+                padding-left: 20px;
+                opacity: 1;
+                transform: none;
                 transition: none;
+                cursor: default;
             }
 
-            .timeline-year {
+            /* Hitbox de hover do desktop não é mais necessária aqui */
+            .timeline-item::after {
+                content: none;
+            }
+
+            /* Marcador fixo na linha, no canto de cada item */
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 4px;
+                width: 10px;
+                height: 10px;
+                border-radius: var(--radius-circle);
+                background: var(--gradient-brand-diagonal);
+                box-shadow: 0 0 0 3px var(--color-white);
+                z-index: 3;
+            }
+
+            .timeline-item.more-dots {
+                opacity: 1;
+            }
+
+            .timeline-year,
+            .timeline-item:hover .timeline-year {
                 position: static;
                 transform: none;
                 bottom: auto;
-                margin-bottom: 20px;
+                flex-shrink: 0;
+                width: 34px;
+                margin-top: 3px;
+                margin-bottom: 0;
+                font-size: 11px;
+                color: var(--color-primary);
                 display: block;
+                white-space: normal;
+                transition: none;
             }
 
-            .point-content {
-                padding: 0;
-            }
-
-            .more-dots-text {
-                position: absolute;
-                bottom: auto;
-                top: -10px;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            /* No mobile a linha do tempo é vertical, então o cartão abre para o lado da bolinha, não para cima */
+            /* O "ponto" já nasce como o cartão fino ao lado da linha — sem
+               depender de :hover e sem transição */
+            .point-circle,
             .timeline-item:hover .point-circle {
-                top: -10px;
-                left: 30px;
-                bottom: auto;
-                transform: translateX(0);
-                width: calc(100% - 60px);
+                position: static;
+                flex: 1;
+                min-width: 0;
+                width: auto;
                 height: auto;
-                min-height: 150px;
-                border-radius: 16px;
+                min-height: 0;
+                bottom: auto;
+                left: auto;
+                top: auto;
+                transform: none;
+                transition: none;
+                background: linear-gradient(135deg, var(--color-blue-soft) 0%, var(--color-surface) 100%);
+                border: 1px solid var(--border-primary-soft);
+                border-radius: 12px;
+                box-shadow: 0 4px 14px -6px var(--shadow-primary-soft);
                 align-items: flex-start;
                 justify-content: flex-start;
+                overflow: visible;
             }
 
+            .point-content,
             .timeline-item:hover .point-content {
+                position: static;
+                width: 100%;
+                height: auto;
+                opacity: 1;
+                pointer-events: auto;
+                transition: none;
+                padding: 8px 10px;
                 align-items: flex-start;
                 text-align: left;
-                padding: 20px;
             }
 
-            /* No desktop, ao passar o mouse numa bolinha, as vizinhas deslizam
-               para o lado (translateX) pra abrir espaço. No mobile a linha já
-               é vertical/empilhada, então esse deslocamento lateral só jogava
-               a bolinha e o texto pra fora da caixa. Aqui essa animação fica
-               desligada só no ambiente mobile. */
-            .timeline-item,
+            .timeline-date,
+            .timeline-title-item,
+            .timeline-description {
+                opacity: 1;
+                transition: none;
+            }
+
+            .timeline-date {
+                font-size: 10px;
+                margin-bottom: 3px;
+            }
+
+            .timeline-title-item {
+                font-size: 13px;
+                margin-bottom: 3px;
+            }
+
+            .timeline-description {
+                font-size: 11.5px;
+                line-height: 1.4;
+            }
+
+            /* O indicador "···" só fazia sentido escondendo o cartão até o
+               hover; agora o cartão de "Surpresas" já aparece com o
+               conteúdo visível, igual aos demais itens */
+            .more-dots-text {
+                display: none;
+            }
+
+            .timeline-item ~ .timeline-item,
             .timeline-item:hover ~ .timeline-item,
             .timeline-item:has(~ .timeline-item:hover) {
                 transform: none;
-                transition: opacity 0.3s ease;
+                transition: none;
             }
 
             /* Vitrine de TCCs em telas pequenas */
