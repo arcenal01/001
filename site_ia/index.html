@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>Face.IA — retrato pela câmera</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="Voltar ao portal 001">
+      <img src="historico/logo2.jpg" alt="">
+      <span>Face.<strong>IA</strong></span>
+    </a>
+    <nav aria-label="Navegação principal">
+      <a href="../index.html">Portal 001</a>
+      <a href="../nexus.html">Nexus</a>
+      <a href="historico/main.html">Versão histórica</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="intro">
+      <p class="eyebrow">PROJETO RECUPERADO DO HISTÓRICO</p>
+      <h1>Seu retrato,<br><span>do seu jeito.</span></h1>
+      <p class="lead">A interface antiga do Face.IA foi recuperada. Ative a câmera para testar a pré-visualização e capturar um retrato — a imagem fica somente neste navegador.</p>
+      <div class="notice" role="note">
+        <strong>Sobre a análise de beleza</strong>
+        <p>O JavaScript e o modelo de IA originais não aparecem em nenhum commit do repositório. Por isso, esta restauração não inventa uma nota nem classifica rostos como “bonitos” ou “feios”.</p>
+      </div>
+      <p class="privacy">A câmera só é solicitada quando você toca em “Ativar câmera”. Não enviamos nem salvamos suas imagens.</p>
+    </section>
+
+    <section class="camera-card" aria-labelledby="camera-title">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">CÂMERA LOCAL</p>
+          <h2 id="camera-title">Pré-visualização</h2>
+        </div>
+        <span class="privacy-chip">Sem envio</span>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="placeholder" id="placeholder">
+          <span class="camera-icon" aria-hidden="true">◉</span>
+          <p>A câmera ainda está desligada</p>
+          <small>Use o botão abaixo para conceder acesso.</small>
+        </div>
+        <video id="video" autoplay muted playsinline aria-label="Pré-visualização da câmera"></video>
+        <img id="snapshot" alt="Retrato capturado pela câmera" hidden>
+        <canvas id="capture" hidden></canvas>
+      </div>
+
+      <p class="status" id="status" role="status" aria-live="polite">Pronto para iniciar.</p>
+      <div class="controls">
+        <button class="button button-primary" id="start-camera" type="button">Ativar câmera</button>
+        <button class="button" id="take-photo" type="button" disabled>Capturar retrato</button>
+        <button class="button button-quiet" id="stop-camera" type="button" disabled>Desligar</button>
+      </div>
+      <a class="download" id="download" hidden download="retrato-face-ia.png">Baixar retrato</a>
+      <p class="camera-help">A câmera exige permissão do navegador e uma conexão segura (HTTPS ou localhost).</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>Face.IA — restauração independente do Nexus</span>
+    <a href="historico/README.md">Arquivos originais recuperados</a>
+  </footer>
+</body>
+</html>
